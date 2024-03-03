@@ -13,7 +13,7 @@ interface filterSettingProps {
 class apiConnections {
     
     private PASSWORLD = "Valantis"
-    private URL_REQUEST = "http://api.valantis.store:40000/";
+    private URL_REQUEST = "https://api.valantis.store:41000/";
     
     private getIds = async() => {
         const request = {action: "get_ids", params: {"limit": 1000}}
