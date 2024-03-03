@@ -44,7 +44,7 @@ class apiConnections {
         return await fetch(this.URL_REQUEST, options).then(async res => await res.json())
     }
 
-    getProducts = async(filterSetting?: filterSettingProps, repeatedRequest: number = 5) => {
+    getProducts = async(filterSetting?: filterSettingProps, repeatedRequest: number = 20) => {
         try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let dataRequest: any = "";
