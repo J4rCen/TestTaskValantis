@@ -1,0 +1,12 @@
+.app_cardProduct_div {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 200px);
+    grid-template-rows: auto;
+    justify-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.app_filter_div {
+    margin: 10px;
+}

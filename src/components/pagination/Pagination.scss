@@ -1,0 +1,14 @@
+.pagination_ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+}
+
+.pagination_ul_li {
+    display: flex;
+    height: 20px;
+    width: 20px;
+    margin: 5px;
+    justify-content: center;
+    background-color: cornsilk;
+}
