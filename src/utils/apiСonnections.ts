@@ -13,7 +13,7 @@ interface filterSettingProps {
 class apiConnections {
     
     private PASSWORLD = "Valantis"
-    private URL_REQUEST = "http://api.valantis.store:40000/";
+    private URL_REQUEST = "https://api.valantis.store:41000/";
     
     private getIds = async() => {
         const request = {action: "get_ids", params: {"limit": 1000}}
@@ -28,23 +28,42 @@ class apiConnections {
         
     }
 
-    private connections = async(request: requestApiProps) => {
-        const nowDate = new Date()
-        const tokenAuthentication = CryptoJS.MD5(`${this.PASSWORLD}_${nowDate.getFullYear()}${nowDate.getMonth() + 1 < 10 ? `0${nowDate.getMonth() + 1}` : nowDate.getMonth() + 1}${nowDate.getDate() < 10 ? `0${nowDate.getDate()}` : nowDate.getDate()}`).toString()
+    private connections = async(request: requestApiProps, repeatedRequest: number = 10) => {
+        try {
+            const nowDate = new Date()
+            const tokenAuthentication = CryptoJS.MD5(`${this.PASSWORLD}_${nowDate.getFullYear()}${nowDate.getMonth() + 1 < 10 ? `0${nowDate.getMonth() + 1}` : nowDate.getMonth() + 1}${nowDate.getDate() < 10 ? `0${nowDate.getDate()}` : nowDate.getDate()}`).toString()
 
-        const options = {
-            method: 'POST', 
-            headers: new Headers({ 
-                'Content-Type': 'application/json', 
-                'X-Auth': tokenAuthentication,
-            }), 
-            body: JSON.stringify( request )
+            const options = {
+                method: 'POST', 
+                headers: new Headers({ 
+                    'Content-Type': 'application/json', 
+                    'X-Auth': tokenAuthentication,
+                }), 
+                body: JSON.stringify( request )
+            }
+
+            const res = await fetch(this.URL_REQUEST, options)
+            .then(res => {
+                return res.json()
+            })
+            .catch(err => {
+                console.error(err)
+
+                if(repeatedRequest !== 0) {
+                    console.log(repeatedRequest)
+                    repeatedRequest -= 1
+                    this.connections(request, repeatedRequest)
+                }
+            })
+
+            return res
+            
+        } catch (error) {
+            console.error(error)
         }
-
-        return await fetch(this.URL_REQUEST, options).then(async res => await res.json())
     }
 
-    getProducts = async(filterSetting?: filterSettingProps, repeatedRequest: number = 5) => {
+    getProducts = async(filterSetting?: filterSettingProps, repeatedRequest: number = 10) => {
         try {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let dataRequest: any = "";
