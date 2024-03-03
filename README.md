@@ -3,7 +3,7 @@
 Стек: Ts, React, Vite
 
 Запуск в dev моде:
-/n
+\n
 npm i
-/n
+\n
 npm run dev
