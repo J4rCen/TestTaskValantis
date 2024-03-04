@@ -16,47 +16,76 @@ class apiConnections {
     private URL_REQUEST = "https://api.valantis.store:41000/";
     
     private getIds = async() => {
-        const request = {action: "get_ids", params: {"limit": 1000}}
-        return await this.connections(request)
+        try {
+            const request = {action: "get_ids", params: {"limit": 1000}}
+            return await this.connections(request)
+            
+        } catch (error) {
+            console.error(error)
+            this.getIds()
+
+        }
         
     }
 
     private filter = async(filter: string | undefined, parameter: number | string | undefined) => {
-        const params = JSON.parse(`{"${filter}": ${filter === "price" ? parameter : `"${parameter}"`}}`)
-        const request = {action: "filter", params: params}
-        return await this.connections(request)
-        
+        try {
+            const params = JSON.parse(`{"${filter}": ${filter === "price" ? parameter : `"${parameter}"`}}`)
+            const request = {action: "filter", params: params}
+            return await this.connections(request)
+        } catch (error) {
+            console.error(error)
+
+            this.filter(filter, parameter)
+        }
     }
 
     private connections = async(request: requestApiProps, repeatedRequest: number = 10) => {
-        const nowDate = new Date()
-        const tokenAuthentication = CryptoJS.MD5(`${this.PASSWORLD}_${nowDate.getFullYear()}${nowDate.getMonth() + 1 < 10 ? `0${nowDate.getMonth() + 1}` : nowDate.getMonth() + 1}${nowDate.getDate() < 10 ? `0${nowDate.getDate()}` : nowDate.getDate()}`).toString()
 
-        const options = {
-            method: 'POST', 
-            headers: new Headers({ 
-                'Content-Type': 'application/json', 
-                'X-Auth': tokenAuthentication,
-            }), 
-            body: JSON.stringify( request )
-        }
+        try {
+            const nowDate = new Date()
+            const tokenAuthentication = CryptoJS.MD5(`${this.PASSWORLD}_${nowDate.getFullYear()}${nowDate.getMonth() + 1 < 10 ? `0${nowDate.getMonth() + 1}` : nowDate.getMonth() + 1}${nowDate.getDate() < 10 ? `0${nowDate.getDate()}` : nowDate.getDate()}`).toString()
 
-        return await fetch(this.URL_REQUEST, options)
-        .then(async response => {
-            if(!response.ok) {
-                throw new Error('Error occurred!')
+            const options = {
+                method: 'POST', 
+                headers: new Headers({ 
+                    'Content-Type': 'application/json', 
+                    'X-Auth': tokenAuthentication,
+                }), 
+                body: JSON.stringify( request )
             }
 
-            return await response.json()
-        })
-        .catch(err => {
-            console.error(err)
+            const res = await fetch(this.URL_REQUEST, options)
+            .then(async response => {
+                if(!response.ok) {
+                    throw new Error('Error occurred!')
+                }
+
+                return await response.json()
+            })
+            .catch(err => {
+                console.error(err)
+
+                if(repeatedRequest !== 0) {
+                    repeatedRequest -= 1
+                    this.connections(request, repeatedRequest)
+                }
+            })
+
+            if(res.result === undefined) {
+                throw new Error("result equals undefined")
+            }
+
+            return await res
+
+        } catch (error) {
+            console.error(error)
 
             if(repeatedRequest !== 0) {
                 repeatedRequest -= 1
                 this.connections(request, repeatedRequest)
             }
-        })
+        }
 
     }
 
@@ -87,11 +116,7 @@ class apiConnections {
 
             const res = Array.from(answer, ([, value]) => ( value ))
 
-            if(res === undefined) {
-                throw new Error("undefined")
-            } else {
-                return res
-            }
+            return res
 
         } catch (error) {
             console.error(error)
