@@ -19,14 +19,10 @@ function App() {
     const setProduct = async () => {
       setLoading(true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let res: any | Array<productProps> = await apiСonnections.getProducts(filterSetting)
-      if(res === undefined) {
-        res = []
-      }
-      setProductsState(res)
+      const res: any | Array<productProps> = await apiСonnections.getProducts(filterSetting)
+      setProductsState(res === undefined ? [] : res)
       setCurrentPage(1)
       setLoading(false)
-      
     } 
     setProduct()
     
@@ -43,7 +39,7 @@ function App() {
   const handleSubmit = (event: { preventDefault: () => void }) => {
     event.preventDefault()
 
-    if(filter === "noFilter" || parameter !== ' ') {
+    if(filter === "noFilter" || parameter !== '') {
       setFilterSetting({filter, parameter})
     } else {
       alert("Заполните поле поиска")

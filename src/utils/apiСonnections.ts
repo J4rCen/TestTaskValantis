@@ -29,38 +29,35 @@ class apiConnections {
     }
 
     private connections = async(request: requestApiProps, repeatedRequest: number = 10) => {
-        try {
-            const nowDate = new Date()
-            const tokenAuthentication = CryptoJS.MD5(`${this.PASSWORLD}_${nowDate.getFullYear()}${nowDate.getMonth() + 1 < 10 ? `0${nowDate.getMonth() + 1}` : nowDate.getMonth() + 1}${nowDate.getDate() < 10 ? `0${nowDate.getDate()}` : nowDate.getDate()}`).toString()
+        const nowDate = new Date()
+        const tokenAuthentication = CryptoJS.MD5(`${this.PASSWORLD}_${nowDate.getFullYear()}${nowDate.getMonth() + 1 < 10 ? `0${nowDate.getMonth() + 1}` : nowDate.getMonth() + 1}${nowDate.getDate() < 10 ? `0${nowDate.getDate()}` : nowDate.getDate()}`).toString()
 
-            const options = {
-                method: 'POST', 
-                headers: new Headers({ 
-                    'Content-Type': 'application/json', 
-                    'X-Auth': tokenAuthentication,
-                }), 
-                body: JSON.stringify( request )
+        const options = {
+            method: 'POST', 
+            headers: new Headers({ 
+                'Content-Type': 'application/json', 
+                'X-Auth': tokenAuthentication,
+            }), 
+            body: JSON.stringify( request )
+        }
+
+        return await fetch(this.URL_REQUEST, options)
+        .then(async response => {
+            if(!response.ok) {
+                throw new Error('Error occurred!')
             }
 
-            const res = await fetch(this.URL_REQUEST, options)
-            .then(res => {
-                return res.json()
-            })
-            .catch(err => {
-                console.error(err)
+            return await response.json()
+        })
+        .catch(err => {
+            console.error(err)
 
-                if(repeatedRequest !== 0) {
-                    console.log(repeatedRequest)
-                    repeatedRequest -= 1
-                    this.connections(request, repeatedRequest)
-                }
-            })
+            if(repeatedRequest !== 0) {
+                repeatedRequest -= 1
+                this.connections(request, repeatedRequest)
+            }
+        })
 
-            return res
-            
-        } catch (error) {
-            console.error(error)
-        }
     }
 
     getProducts = async(filterSetting?: filterSettingProps, repeatedRequest: number = 10) => {
@@ -90,7 +87,11 @@ class apiConnections {
 
             const res = Array.from(answer, ([, value]) => ( value ))
 
-            return res
+            if(res === undefined) {
+                throw new Error("undefined")
+            } else {
+                return res
+            }
 
         } catch (error) {
             console.error(error)
